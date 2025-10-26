@@ -75,7 +75,8 @@ async function fetchPrices(db) {
 
   for (const item of URLS) {
     try {
-      const res = await axios.get(item.url);
+      // const res = await axios.get(item.url);
+       const res = await fetchWithRetry(item.url, 3, 5000); // ۳ بار، هر بار ۵ ثانیه فاصله
       const $ = cheerio.load(res.data);
       let raw = $(item.selector).first().text().trim().replace(/,/g, '');
 
@@ -129,6 +130,22 @@ async function sendToTelegram(db) {
     console.log('📩 Message sent to Telegram.');
   } catch (err) {
     console.error('Error sending to Telegram:', err.message);
+  }
+}
+
+async function fetchWithRetry(url, retries = 3, delay = 3000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await axios.get(url, { timeout: 10000 }); // 10s timeout
+    } catch (err) {
+      console.warn(`❗ Error fetching (${i + 1}/${retries}): ${err.code || err.message}`);
+
+      if (i === retries - 1) {
+        throw err; // آخرین تلاش هم fail شد → بنداز بیرون
+      }
+
+      await new Promise(res => setTimeout(res, delay)); // delay بین retryها
+    }
   }
 }
 
