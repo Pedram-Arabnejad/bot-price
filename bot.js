@@ -23,9 +23,7 @@ if (!TOKEN || !CHANNEL_ID) {
 
 const bot = new TelegramBot(TOKEN, {
   polling: false,
-  request: {
-    baseApiUrl: `https://telegram-proxy.mahdyaslami.workers.dev`,
-  }
+  request: { baseApiUrl: 'https://telegram-proxy.mahdyaslami.workers.dev' }
 });
 
 // MySQL connection
@@ -127,6 +125,8 @@ async function sendToTelegram(db) {
   const message = await buildMessageFromDB(db);
   try {
     console.log('message:',message);
+    console.log('bot Info',bot);
+    console.log('bot Info request', bot._options.request);
     await bot.sendMessage(CHANNEL_ID, message);
     console.log('📩 Message sent to Telegram.');
   } catch (err) {
