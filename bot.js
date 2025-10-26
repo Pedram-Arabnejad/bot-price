@@ -121,35 +121,36 @@ async function buildMessageFromDB(db) {
 }
 
 // Send to Telegram
+// async function sendToTelegram(db) {
+//   const message = await buildMessageFromDB(db);
+//   try {
+//     console.log('message:',message);
+//     console.log('bot Info',bot);
+//     console.log('bot Info request', bot._options.request);
+//     await bot.sendMessage(CHANNEL_ID, message);
+//     console.log('📩 Message sent to Telegram.');
+//   } catch (err) {
+//     console.error('Error sending to Telegram:', err.message);
+//   }
+// }
 async function sendToTelegram(db) {
   const message = await buildMessageFromDB(db);
-
-  console.log('✅ آماده ارسال به تلگرام...');
-  console.log('✅ CHANNEL_ID:', CHANNEL_ID);
-  console.log('✅ MESSAGE preview:', message);
-
+  console.log('message:',message);
   try {
-    const res = await bot.sendMessage(CHANNEL_ID, message);
-    console.log('📩 Telegram Response:', {
-      ok: res && res.ok,
-      result_id: res && res.result && res.result.message_id
-    });
+    const res = await axios.post(
+      "https://telegram-proxy.mahdyaslami.workers.dev/bot" + TOKEN + "/sendMessage",
+      {
+        chat_id: CHANNEL_ID,
+        text: message,
+        parse_mode: "HTML"
+      },
+      { timeout: 20000 }
+    );
+    console.log("📩 Telegram OK:", res.data);
   } catch (err) {
-    // خروجی کامل برای debug
-    console.error('❌ Error sending to Telegram - message:', err.message);
-    if (err.response) {
-      console.error('---- err.response.status:', err.response.status);
-      console.error('---- err.response.data:', err.response.data);
-    }
-    if (err.code) {
-      console.error('---- err.code:', err.code);
-    }
-    if (err.request) {
-      console.error('---- err.request exists (request was sent)');
-    }
+    console.error("❌ Telegram ERROR:", err.message, err?.response?.data);
   }
 }
-
 
 async function fetchWithRetry(url, retries = 3, delay = 3000) {
   for (let i = 0; i < retries; i++) {
