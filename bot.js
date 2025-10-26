@@ -123,16 +123,33 @@ async function buildMessageFromDB(db) {
 // Send to Telegram
 async function sendToTelegram(db) {
   const message = await buildMessageFromDB(db);
+
+  console.log('✅ آماده ارسال به تلگرام...');
+  console.log('✅ CHANNEL_ID:', CHANNEL_ID);
+  console.log('✅ MESSAGE preview:', message);
+
   try {
-    console.log('message:',message);
-    console.log('bot Info',bot);
-    console.log('bot Info request', bot._options.request);
-    await bot.sendMessage(CHANNEL_ID, message);
-    console.log('📩 Message sent to Telegram.');
+    const res = await bot.sendMessage(CHANNEL_ID, message);
+    console.log('📩 Telegram Response:', {
+      ok: res && res.ok,
+      result_id: res && res.result && res.result.message_id
+    });
   } catch (err) {
-    console.error('Error sending to Telegram:', err.message);
+    // خروجی کامل برای debug
+    console.error('❌ Error sending to Telegram - message:', err.message);
+    if (err.response) {
+      console.error('---- err.response.status:', err.response.status);
+      console.error('---- err.response.data:', err.response.data);
+    }
+    if (err.code) {
+      console.error('---- err.code:', err.code);
+    }
+    if (err.request) {
+      console.error('---- err.request exists (request was sent)');
+    }
   }
 }
+
 
 async function fetchWithRetry(url, retries = 3, delay = 3000) {
   for (let i = 0; i < retries; i++) {
