@@ -151,21 +151,17 @@ async function sendToTelegram(db) {
   });
 }
 
-async function fetchWithRetry(url, retries = 3, delay = 3000) {
+const fetchWithRetry = async (url, retries = 3, delay = 5000) => {
   for (let i = 0; i < retries; i++) {
     try {
-      return await axios.get(url, { timeout: 10000 }); // 10s timeout
+      return await axios.get(url, { timeout: 10000 }); // 10s
     } catch (err) {
-      console.warn(`❗ Error fetching (${i + 1}/${retries}): ${err.code || err.message}`);
-
-      if (i === retries - 1) {
-        throw err; 
-      }
-
+      console.warn(`❗ Error fetching (${i+1}/${retries}): ${err.code || err.message}`);
+      if (i === retries - 1) throw err;
       await new Promise(res => setTimeout(res, delay));
     }
   }
-}
+};
 
 const iranTime = new Intl.DateTimeFormat('fa-IR', {
   year: 'numeric',
@@ -187,8 +183,14 @@ const iranTime = new Intl.DateTimeFormat('fa-IR', {
 
   // Repeat every 1 hour
   setInterval(async () => {
-    await fetchPrices(db);
-    await sendToTelegram(db);
-  }, 3600 * 1000);
+    try {
+      const db = await initDB();
+      await fetchPrices(db);
+      await sendToTelegram(db);
+    } catch(err) {
+      console.error('🔥 Interval error:', err.message);
+    }
+  // }, 3600 * 1000); // 1 ساعت
+  }, 5 * 60 * 1000); // 5 دقیقه
 })();
 
