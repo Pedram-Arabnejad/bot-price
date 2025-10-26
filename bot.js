@@ -175,22 +175,17 @@ const iranTime = new Intl.DateTimeFormat('fa-IR', {
 }).format(new Date());
 
 (async () => {
-  const db = await initDB();
+  const db = await initDB(); // فقط یک بار
   await fetchPrices(db);
-  console.log('price get');
   await sendToTelegram(db);
-  console.log('🤖 Price Bot is running ✅');
 
-  // Repeat every 1 hour
   setInterval(async () => {
     try {
-      const db = await initDB();
       await fetchPrices(db);
       await sendToTelegram(db);
-    } catch(err) {
+    } catch (err) {
       console.error('🔥 Interval error:', err.message);
     }
-  // }, 3600 * 1000); // 1 ساعت
-  }, 5 * 60 * 1000); // 5 دقیقه
+  }, 5 * 60 * 1000);
 })();
 
