@@ -126,6 +126,7 @@ async function buildMessageFromDB(db) {
 async function sendToTelegram(db) {
   const message = await buildMessageFromDB(db);
   try {
+    console.log('message:',message);
     await bot.sendMessage(CHANNEL_ID, message);
     console.log('📩 Message sent to Telegram.');
   } catch (err) {
