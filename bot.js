@@ -147,7 +147,6 @@ async function sendToTelegram(db) {
       return;
     }
     if (stderr) console.error(`❌ curl stderr: ${stderr}`);
-    console.log(`📩 Telegram stdout: ${stdout}`);
   });
 }
 
