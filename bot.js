@@ -26,13 +26,13 @@ const bot = new TelegramBot(TOKEN, { polling: false });
 // MySQL connection
 async function initDB() {
   const db = await mysql.createConnection({
-  host: process.env.MYSQL_HOST || '127.0.0.1',
-  port: process.env.MYSQL_PORT || 3306,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE
-});
-console.log('✅ MySQL connected!');
+    host: process.env.MYSQL_HOST || '127.0.0.1',
+    port: process.env.MYSQL_PORT || 3306,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE
+  });
+  console.log('✅ MySQL connected!');
 
 
   await db.execute(`
@@ -131,6 +131,7 @@ async function sendToTelegram(db) {
 (async () => {
   const db = await initDB();
   await fetchPrices(db);
+  console.log('price get');
   await sendToTelegram(db);
   console.log('🤖 Price Bot is running ✅');
 
