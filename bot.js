@@ -24,7 +24,7 @@ if (!TOKEN || !CHANNEL_ID) {
 const bot = new TelegramBot(TOKEN, {
   polling: false,
   request: {
-    baseApiUrl: `https://telegram-proxy.mahdyaslami.workers.dev/bot${TOKEN}/`,
+    baseApiUrl: `https://telegram-proxy.mahdyaslami.workers.dev`,
   }
 });
 
