@@ -21,7 +21,12 @@ if (!TOKEN || !CHANNEL_ID) {
   process.exit(1);
 }
 
-const bot = new TelegramBot(TOKEN, { polling: false });
+const bot = new TelegramBot(TOKEN, {
+  polling: false,
+  request: {
+    baseApiUrl: `https://telegram-proxy.mahdyaslami.workers.dev/bot${TOKEN}/`,
+  }
+});
 
 // MySQL connection
 async function initDB() {
