@@ -118,7 +118,7 @@ async function buildMessageFromDB(db) {
     message += `${item.label}: ${value}\n\n`; 
   }
 
-  message += `⏰ بروزرسانی: ${new Date().toLocaleString('fa-IR')}`;
+  message += `⏰ بروزرسانی: ${iranTime}`;
   return message;
 }
 
@@ -166,6 +166,17 @@ async function fetchWithRetry(url, retries = 3, delay = 3000) {
     }
   }
 }
+
+const iranTime = new Intl.DateTimeFormat('fa-IR', {
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+  timeZone: 'Asia/Tehran'
+}).format(new Date());
 
 (async () => {
   const db = await initDB();
