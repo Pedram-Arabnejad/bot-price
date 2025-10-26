@@ -118,6 +118,17 @@ async function buildMessageFromDB(db) {
     message += `${item.label}: ${value}\n\n`; 
   }
 
+  const iranTime = new Intl.DateTimeFormat('fa-IR', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Tehran'
+  }).format(new Date());
+
   message += `⏰ بروزرسانی: ${iranTime}`;
   return message;
 }
@@ -163,25 +174,15 @@ const fetchWithRetry = async (url, retries = 3, delay = 5000) => {
   }
 };
 
-const iranTime = new Intl.DateTimeFormat('fa-IR', {
-  year: 'numeric',
-  month: 'numeric',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-  hour12: false,
-  timeZone: 'Asia/Tehran'
-}).format(new Date());
-
 (async () => {
-  const db = await initDB(); // فقط یک بار
+  const db = await initDB();
   await fetchPrices(db);
   await sendToTelegram(db);
 
   setInterval(async () => {
     try {
       await fetchPrices(db);
+      console.log('get price success');
       await sendToTelegram(db);
     } catch (err) {
       console.error('🔥 Interval error:', err.message);
