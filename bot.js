@@ -6,6 +6,7 @@ const cheerio = require('cheerio');
 const TelegramBot = require('node-telegram-bot-api');
 const dotenv = require('dotenv');
 const mysql = require('mysql2/promise');
+const https = require('https');
 
 dotenv.config();
 
@@ -142,10 +143,14 @@ async function sendToTelegram(db) {
       {
         chat_id: CHANNEL_ID,
         text: message,
-        parse_mode: "HTML"
+        parse_mode: "HTML",
       },
-      { timeout: 20000 }
+      {
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }), // مهم
+        timeout: 30000, // افزایش دادیم به 30 ثانیه
+      }
     );
+
     console.log("📩 Telegram OK:", res.data);
   } catch (err) {
     console.error("❌ Telegram ERROR:", err.message, err?.response?.data);
