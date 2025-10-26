@@ -13,7 +13,6 @@ dotenv.config();
 const DUMPS_DIR = path.join(__dirname, 'dumps');
 fs.ensureDirSync(DUMPS_DIR);
 
-// Telegram
 const TOKEN = process.env.TELEGRAM_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
@@ -22,10 +21,10 @@ if (!TOKEN || !CHANNEL_ID) {
   process.exit(1);
 }
 
-const bot = new TelegramBot(TOKEN, {
-  polling: false,
-  request: { baseApiUrl: 'https://telegram-proxy.mahdyaslami.workers.dev' }
-});
+// const bot = new TelegramBot(TOKEN, {
+//   polling: false,
+//   request: { baseApiUrl: 'https://telegram-proxy.mahdyaslami.workers.dev' }
+// });
 
 // MySQL connection
 async function initDB() {
@@ -74,8 +73,7 @@ async function fetchPrices(db) {
 
   for (const item of URLS) {
     try {
-      // const res = await axios.get(item.url);
-       const res = await fetchWithRetry(item.url, 3, 5000); // ۳ بار، هر بار ۵ ثانیه فاصله
+      const res = await fetchWithRetry(item.url, 3, 5000);
       const $ = cheerio.load(res.data);
       let raw = $(item.selector).first().text().trim().replace(/,/g, '');
 
@@ -103,21 +101,24 @@ async function fetchPrices(db) {
 
 // Build Telegram message
 async function buildMessageFromDB(db) {
-  let message = '💹 قیمت‌های امروز:\n\n';
   const [rows] = await db.execute('SELECT name, value FROM prices');
+  let message = '💹 قیمت‌های امروز:\n\n';
 
   for (const item of URLS) {
     const row = rows.find(r => r.name === item.name);
     if (!row) continue;
 
-    if (item.name === 'bitcoin' || item.name === 'ethereum') {
-      message += `${item.label}: ${row.value}\n`;
-    } else {
-      message += `${item.label}: ${row.value} تومان\n`;
+    let value = row.value;
+
+    if (item.name !== 'bitcoin' && item.name !== 'ethereum') {
+      value = Number(value).toLocaleString('en-US'); 
+      value += ' تومان';
     }
+
+    message += `${item.label}: ${value}\n\n`; 
   }
 
-  message += `\n⏰ بروزرسانی: ${new Date().toLocaleString('fa-IR')}`;
+  message += `⏰ بروزرسانی: ${new Date().toLocaleString('fa-IR')}`;
   return message;
 }
 
@@ -158,15 +159,14 @@ async function fetchWithRetry(url, retries = 3, delay = 3000) {
       console.warn(`❗ Error fetching (${i + 1}/${retries}): ${err.code || err.message}`);
 
       if (i === retries - 1) {
-        throw err; // آخرین تلاش هم fail شد → بنداز بیرون
+        throw err; 
       }
 
-      await new Promise(res => setTimeout(res, delay)); // delay بین retryها
+      await new Promise(res => setTimeout(res, delay));
     }
   }
 }
 
-// Main
 (async () => {
   const db = await initDB();
   await fetchPrices(db);
