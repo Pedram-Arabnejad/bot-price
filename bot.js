@@ -6,7 +6,7 @@ const cheerio = require('cheerio');
 const TelegramBot = require('node-telegram-bot-api');
 const dotenv = require('dotenv');
 const mysql = require('mysql2/promise');
-const https = require('https');
+const { exec } = require("child_process");
 
 dotenv.config();
 
@@ -136,25 +136,18 @@ async function buildMessageFromDB(db) {
 // }
 async function sendToTelegram(db) {
   const message = await buildMessageFromDB(db);
-  console.log('message:',message);
-  try {
-    const res = await axios.post(
-      "https://telegram-proxy.mahdyaslami.workers.dev/bot" + TOKEN + "/sendMessage",
-      {
-        chat_id: CHANNEL_ID,
-        text: message,
-        parse_mode: "HTML",
-      },
-      {
-        httpsAgent: new https.Agent({ rejectUnauthorized: false }), // مهم
-        timeout: 30000, // افزایش دادیم به 30 ثانیه
-      }
-    );
+  const cmd = `curl -s -X POST https://telegram-proxy.mahdyaslami.workers.dev/bot${TOKEN}/sendMessage \
+    -d chat_id="${CHANNEL_ID}" \
+    -d text="${message.replace(/"/g, '\\"')}"`;
 
-    console.log("📩 Telegram OK:", res.data);
-  } catch (err) {
-    console.error("❌ Telegram ERROR:", err.message, err?.response?.data);
-  }
+  exec(cmd, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`❌ curl error: ${error.message}`);
+      return;
+    }
+    if (stderr) console.error(`❌ curl stderr: ${stderr}`);
+    console.log(`📩 Telegram stdout: ${stdout}`);
+  });
 }
 
 async function fetchWithRetry(url, retries = 3, delay = 3000) {
