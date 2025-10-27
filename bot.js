@@ -26,7 +26,6 @@ if (!TOKEN || !CHANNEL_ID) {
 //   request: { baseApiUrl: 'https://telegram-proxy.mahdyaslami.workers.dev' }
 // });
 
-// MySQL connection
 async function initDB() {
   const db = await mysql.createConnection({
     host: process.env.MYSQL_HOST || '127.0.0.1',
@@ -49,7 +48,6 @@ async function initDB() {
   return db;
 }
 
-// URLs
 const URLS = [
   { name: 'dollar', url: 'https://www.tgju.org/profile/price_dollar_rl', selector: 'span.price', label: '💵 دلار' },
   { name: 'gold18', url: 'https://www.tgju.org/profile/geram18', selector: 'span.price', label: '🥇 طلای ۱۸ عیار' },
@@ -66,7 +64,6 @@ const URLS = [
   { name: 'ethereum', url: 'https://www.tgju.org/profile/crypto-ethereum', selector: 'span.price', label: '🔷 اتریوم' },
 ];
 
-// Fetch prices
 async function fetchPrices(db) {
   console.log('🕵️‍♂️ Fetching prices...');
   const prices = {};
@@ -99,7 +96,6 @@ async function fetchPrices(db) {
   return prices;
 }
 
-// Build Telegram message
 async function buildMessageFromDB(db) {
   const [rows] = await db.execute('SELECT name, value FROM prices');
   let message = '💹 قیمت‌های امروز:\n\n';
@@ -165,7 +161,7 @@ async function sendToTelegram(db) {
 const fetchWithRetry = async (url, retries = 3, delay = 5000) => {
   for (let i = 0; i < retries; i++) {
     try {
-      return await axios.get(url, { timeout: 10000 }); // 10s
+      return await axios.get(url, { timeout: 10000 });
     } catch (err) {
       console.warn(`❗ Error fetching (${i+1}/${retries}): ${err.code || err.message}`);
       if (i === retries - 1) throw err;
@@ -187,6 +183,5 @@ const fetchWithRetry = async (url, retries = 3, delay = 5000) => {
     } catch (err) {
       console.error('🔥 Interval error:', err.message);
     }
-  }, 5 * 60 * 1000);
+  }, 55 * 60 * 1000);
 })();
-
