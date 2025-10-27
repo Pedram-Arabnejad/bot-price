@@ -183,5 +183,5 @@ const fetchWithRetry = async (url, retries = 3, delay = 5000) => {
     } catch (err) {
       console.error('🔥 Interval error:', err.message);
     }
-  }, 55 * 60 * 1000);
+  }, 55 * 60 * 1000); // 1 hour
 })();
